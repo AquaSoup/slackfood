@@ -11,7 +11,7 @@ only requests library, you can install it by this code:
 
 > pip3 install -r requirements.txt
 
-# Running
+# Examples
 If you want to debug, you can run:
 > python3 main.py
 
@@ -19,6 +19,10 @@ and output will be printed to console.
 
 
 If you want post it via webhook you can run:
-> python3 main.py production
+> python3 main.py -s
 
 and output will be posted via webhook.
+
+If you want display food only when price is defined you can run:
+
+> python3 main.py -wp

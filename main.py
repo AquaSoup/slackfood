@@ -1,24 +1,38 @@
 import json
 import requests
 import pprint
-import sys
+import argparse
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "-s",
+    action='store_true',
+    help="post to slack")
+
+parser.add_argument(
+    "-wp",
+    action='store_true',
+    help="display only dishes with price")
+
+args = parser.parse_args()
 
 
 class Slack:
 
     def __init__(self):
-        if not is_debug():
+        if args.s:
             self.hook_link = get_data_from_token("slack-web-hook-link")
 
     def post(self, menus):
         for menu in menus:
             post_data = {"text": menu}
-            if is_debug():
-                pp = pprint.PrettyPrinter(indent=4)
-                pp.pprint(json.dumps(post_data))
-            else:
+            if args.s:
                 data = json.dumps(post_data, ensure_ascii=False).encode('utf8')
                 requests.post(self.hook_link, data=data)
+            else:
+                pp = pprint.PrettyPrinter(indent=4)
+                pp.pprint(json.dumps(post_data))
 
 
 class Zomato:
@@ -35,8 +49,11 @@ class Zomato:
             headers=headers)
         if r.status_code == requests.codes.ok:
             dishes = r.json()["daily_menus"][0]["daily_menu"]["dishes"]
-            w_pr = list(filter(lambda x: len(x["dish"]["price"]) > 0, dishes))
-            return self.format_data(w_pr, name)
+            if args.wp:
+                wp = list(filter(
+                    lambda x: len(x["dish"]["price"]) > 0,
+                    dishes))
+            return self.format_data(wp, name)
         else:
             return self.no_daily_menu(name)
 
