@@ -50,10 +50,10 @@ class Zomato:
         if r.status_code == requests.codes.ok:
             dishes = r.json()["daily_menus"][0]["daily_menu"]["dishes"]
             if args.wp:
-                wp = list(filter(
+                dishes = list(filter(
                     lambda x: len(x["dish"]["price"]) > 0,
                     dishes))
-            return self.format_data(wp, name)
+            return self.format_data(dishes, name)
         else:
             return self.no_daily_menu(name)
 
@@ -79,13 +79,6 @@ def get_data_from_token(id):
         tokens_json = json.load(tokens_file)
         token = tokens_json[id]
     return token
-
-
-def is_debug():
-    DEBUG = True
-    if len(sys.argv) > 1:
-        DEBUG = sys.argv[1] != "production"
-    return DEBUG
 
 
 zom = Zomato()
