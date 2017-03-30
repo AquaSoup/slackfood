@@ -7,7 +7,8 @@ import sys
 class Slack:
 
     def __init__(self):
-        self.hook_link = get_data_from_token("slack-web-hook-link")
+        if not is_debug():
+            self.hook_link = get_data_from_token("slack-web-hook-link")
 
     def post(self, menus):
         for menu in menus:
@@ -32,14 +33,22 @@ class Zomato:
             "https://developers.zomato.com/api/v2.1/dailymenu",
             params=payload,
             headers=headers)
-        dishes = r.json()["daily_menus"][0]["daily_menu"]["dishes"]
-        w_price = list(filter(lambda x: len(x["dish"]["price"]) > 0, dishes))
-        return self.format_data(w_price, name)
+        if r.status_code == requests.codes.ok:
+            dishes = r.json()["daily_menus"][0]["daily_menu"]["dishes"]
+            w_pr = list(filter(lambda x: len(x["dish"]["price"]) > 0, dishes))
+            return self.format_data(w_pr, name)
+        else:
+            return self.no_daily_menu(name)
 
     def format_data(self, data, restaurant_name):
         dishes = "*" + restaurant_name + "*" + "\n"
         for dish in data:
             dishes += dish["dish"]["name"] + "\n"
+        return dishes
+
+    def no_daily_menu(self, restaurant_name):
+        dishes = "*" + restaurant_name + "*" + "\n"
+        dishes += "no daily menu"
         return dishes
 
     def read_restaurants(self):
